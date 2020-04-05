@@ -7,7 +7,7 @@ import os, time
 import config
 
 class Sac1:
-    def __init__(self):
+    def __init__(self, config):
         pass
     def init_model(self):
         pass
