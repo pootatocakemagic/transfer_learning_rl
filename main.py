@@ -29,7 +29,7 @@ if GET_REPLAY_BUFFER:
             env1 = BWstu()
             ts_env = BWstu()
       else:
-            print('задайте коректное окружение(ENV) возможные - трава, ямы, пни')
+            print('задайте корректное окружение(ENV) возможные - трава, ямы, пни')
             exit()
       sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, actor_critic=core.mlp_actor_critic,
             ac_kwargs=dict(hidden_sizes=[400, 300]),
@@ -47,11 +47,11 @@ if GET_REPLAY_BUFFER:
       np_skill = np.hstack((replay_buffer.obs1_buf,replay_buffer.obs2_buf, replay_buffer.acts_buf, replay_buffer.rews_buf.reshape(replay_buffer.rews_buf.shape[0], 1)))
       np_skill = np_skill[0:replay_buffer.size]
       print(np_skill[ep])
-      np.savez_compressed('replay', np_skill)
+      np.savez_compressed('replay_{}'.format(ENV), np_skill)
 
 if FIT_VAE_TEST_AGENT:
       vae = Vae(config)
-      x_train = np.load('replay.npz')['arr_0']
+      x_train = np.load('replay_{}.npz'.format(ENV))['arr_0']
       vae.fit_vae(x_train)
       vae.testing(x_train)
       apr = aparam()
@@ -70,7 +70,7 @@ if FIT_VAE_TEST_AGENT:
             env1 = BWstu()
             ts_env = BWstu()
       else:
-            print('задайте коректное окружение(ENV) возможные - трава, ямы, пни')
+            print('задайте корректное окружение(ENV) возможные - трава, ямы, пни')
             exit()
       ts_env = BWg()
       sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, vae=vae, actor_critic=core.mlp_actor_critic,
