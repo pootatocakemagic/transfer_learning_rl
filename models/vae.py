@@ -59,7 +59,7 @@ class Vae:
                 x = Dense(layer[0], activation=layer[1])(latent_inputs)
             else:
                 x = Dense(layer[0], activation=layer[1])(x)
-        outputs = Dense(original_dim, activation='sigmoid')(x)
+        outputs = Dense(original_dim, activation=self.config.OUTPUT_FN_ACTIVATION)(x)
 
         # instantiate decoder model
         models["decoder"] = Model(latent_inputs, outputs, name='decoder')

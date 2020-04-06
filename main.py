@@ -1,23 +1,36 @@
 from lib.aparam import aparam
 from lib.replay_buffer import ReplayBuffer
 from spinup.utils.run_utils import setup_logger_kwargs
-from lib.env import Wrapper, BWg
+from lib.env import Wrapper, BWg, BWpit, BWstu
 from models.sac1 import sac1
 from spinup.algos.sac1 import core
 import numpy as np
 from models.vae import Vae
 import config
 
-GET_REPLAY_BUFFER = False
+GET_REPLAY_BUFFER = True
 FIT_VAE_TEST_AGENT = True
+ENV = 'ямы' # возможные значения 'трава' 'ямы' 'пни'
 
 if GET_REPLAY_BUFFER:
       apr = aparam()
       replay_buffer = ReplayBuffer(24, 4, int(2e6))
       logger_kwargs = setup_logger_kwargs(apr.exp_name, apr.seed)
-      env3 = Wrapper(BWg(), apr, 3)     # трава
-      env1 = BWg()
-      ts_env = BWg()
+      if ENV == 'трава':
+            env3 = Wrapper(BWg(), apr, 3)     # трава
+            env1 = BWg()
+            ts_env = BWg()
+      elif ENV == 'ямы':
+            env3 = Wrapper(BWpit(), apr, 3)   # ямы
+            env1 = BWpit()
+            ts_env = BWpit()
+      elif ENV == 'пни':
+            env3 = Wrapper(BWstu(), apr, 3)     # пни
+            env1 = BWstu()
+            ts_env = BWstu()
+      else:
+            print('задайте коректное окружение(ENV) возможные - трава, ямы, пни')
+            exit()
       sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, actor_critic=core.mlp_actor_critic,
             ac_kwargs=dict(hidden_sizes=[400, 300]),
             gamma=apr.gamma, seed=apr.seed, epochs=apr.epochs, alpha=apr.alpha,
@@ -44,8 +57,21 @@ if FIT_VAE_TEST_AGENT:
       apr = aparam()
       replay_buffer = ReplayBuffer(24, 4, int(2e6))
       logger_kwargs = setup_logger_kwargs(apr.exp_name, apr.seed)
-      env3 = Wrapper(BWg(), apr, 3)  # трава
-      env1 = BWg()
+      if ENV == 'трава':
+            env3 = Wrapper(BWg(), apr, 3)     # трава
+            env1 = BWg()
+            ts_env = BWg()
+      elif ENV == 'ямы':
+            env3 = Wrapper(BWpit(), apr, 3)   # ямы
+            env1 = BWpit()
+            ts_env = BWpit()
+      elif ENV == 'пни':
+            env3 = Wrapper(BWstu(), apr, 3)     # пни
+            env1 = BWstu()
+            ts_env = BWstu()
+      else:
+            print('задайте коректное окружение(ENV) возможные - трава, ямы, пни')
+            exit()
       ts_env = BWg()
       sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, vae=vae, actor_critic=core.mlp_actor_critic,
            ac_kwargs=dict(hidden_sizes=[400, 300]),

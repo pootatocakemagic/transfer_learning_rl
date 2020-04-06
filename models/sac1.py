@@ -8,7 +8,8 @@ import config
 
 class Sac1:
     def __init__(self, config):
-        pass
+        self.config = config
+
     def init_model(self):
         pass
     def train(self):
