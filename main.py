@@ -8,9 +8,9 @@ import numpy as np
 from models.vae import Vae
 import config
 
-GET_REPLAY_BUFFER = True
+GET_REPLAY_BUFFER = False
 FIT_VAE_TEST_AGENT = True
-ENV = 'ямы' # возможные значения 'трава' 'ямы' 'пни'
+ENV = 'трава' # возможные значения 'трава' 'ямы' 'пни'
 
 if GET_REPLAY_BUFFER:
       apr = aparam()
