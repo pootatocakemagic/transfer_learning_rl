@@ -11,7 +11,9 @@ import config
 GET_REPLAY_BUFFER = False
 FIT_VAE_TEST_AGENT = True
 ENV = 'трава' # возможные значения 'трава' 'ямы' 'пни'
-
+# x_train = np.load('replay_{}.npz'.format("трава228"), allow_pickle=True)['arr_0']
+# print(x_train[0][0])
+# exit()
 if GET_REPLAY_BUFFER:
       apr = aparam()
       replay_buffer = ReplayBuffer(24, 4, int(2e6))
@@ -50,10 +52,11 @@ if GET_REPLAY_BUFFER:
       np.savez_compressed('replay_{}'.format(ENV), np_skill)
 
 if FIT_VAE_TEST_AGENT:
-      vae = Vae(config)
-      x_train = np.load('replay_{}.npz'.format(ENV))['arr_0']
-      vae.fit_vae(x_train)
-      vae.testing(x_train)
+      # vae = Vae(config)
+      # x_train = np.load('replay_{}.npz'.format(ENV))['arr_0']
+      # vae.fit_vae(x_train)
+      x_train = np.load('replay_{}.npz'.format("трава228"), allow_pickle=True)['arr_0']
+      # vae.testing(x_train)
       apr = aparam()
       replay_buffer = ReplayBuffer(24, 4, int(2e6))
       logger_kwargs = setup_logger_kwargs(apr.exp_name, apr.seed)
@@ -73,7 +76,7 @@ if FIT_VAE_TEST_AGENT:
             print('задайте корректное окружение(ENV) возможные - трава, ямы, пни')
             exit()
       ts_env = BWg()
-      sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, vae=vae, actor_critic=core.mlp_actor_critic,
+      sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, x_train=x_train, vae=None, actor_critic=core.mlp_actor_critic,
            ac_kwargs=dict(hidden_sizes=[400, 300]),
            gamma=apr.gamma, seed=apr.seed, epochs=apr.epochs, alpha=apr.alpha,
            logger_kwargs=logger_kwargs, lr=apr.lr, reward_scale=apr.reward_scale, start_steps=apr.start_steps,
