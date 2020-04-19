@@ -4,7 +4,7 @@ from keras.losses import binary_crossentropy, mse
 from keras import regularizers
 from keras import backend as K
 from keras.callbacks import EarlyStopping
-from utils import normalize, reverse_normalize
+from utils import normalize_vae, reverse_normalize_vae
 
 import numpy as np
 
@@ -83,7 +83,7 @@ class Vae:
         return models, vae_loss
 
     def fit_vae(self, x_train):
-        x_train, self.minimums, self.maximums = normalize(x_train.copy())
+        x_train, self.minimums, self.maximums = normalize_vae(x_train.copy())
         early_stopping = EarlyStopping(monitor='val_loss', patience=10)
         self.vae.fit(x_train, x_train, epochs=self.config.EPOCHS, batch_size=self.config.BATCH_SIZE,
                      validation_split=self.config.VALIDATION_SPLIT, callbacks=[early_stopping])
@@ -99,7 +99,7 @@ class Vae:
     def get_data(self):
         z_sample = np.random.randn(1, self.config.LATENT_DIM)
         X_batch = self.decoder.predict(z_sample)
-        X_batch = reverse_normalize(X_batch, self.minimums, self.maximums)[0]
+        X_batch = reverse_normalize_vae(X_batch, self.minimums, self.maximums)[0]
         obs1 = X_batch[:24]
         obs2 = X_batch[24:48]
         acts = X_batch[48:52]
@@ -109,7 +109,7 @@ class Vae:
     
 
     def testing(self, x_train):
-        x_train, minimums, maximums = normalize(x_train)
+        x_train, minimums, maximums = normalize_vae(x_train)
         X_gen = np.empty(shape=[0, self.config.ORIGINAL_DIM])  # array to store generated samples
 
         for _ in range(500):  # generate samples in batches
@@ -123,23 +123,27 @@ class Vae:
         print(f'obs1: min = {np.min(X_gen[:, :24])}, max = {np.max(X_gen[:, :24])}, mean = {np.mean(X_gen[:, :24])}; '
               f'\nobs2: min = {np.min(X_gen[:, 24:48])}, max = {np.max(X_gen[:, 24:48])}, mean = {np.mean(X_gen[:, 24:48])}; '
               f'\nacts: min = {np.min(X_gen[:, 48:52])}, max = {np.max(X_gen[:, 48:52])}, mean = {np.mean(X_gen[:, 48:52])}; '
-              f'\nrews: min = {np.min(X_gen[:, 52])}, max = {np.max(X_gen[:, 52])}, mean = {np.mean(X_gen[:, 52])};')
+              f'\nrews: min = {np.min(X_gen[:, 52])}, max = {np.max(X_gen[:, 52])}, mean = {np.mean(X_gen[:, 52])};'
+              f'\nd: min = {np.min(x_train[:, 53])}, max = {np.max(x_train[:, 53])}, mean = {np.mean(x_train[:, 53])};')
         print('X_train:')
         print(f'obs1: min = {np.min(x_train[:, :24])}, max = {np.max(x_train[:, :24])}, mean = {np.mean(x_train[:, :24])}; '
               f'\nobs2: min = {np.min(x_train[:, 24:48])}, max = {np.max(x_train[:, 24:48])}, mean = {np.mean(x_train[:, 24:48])}; '
               f'\nacts: min = {np.min(x_train[:, 48:52])}, max = {np.max(x_train[:, 48:52])}, mean = {np.mean(x_train[:, 48:52])}; '
-              f'\nrews: min = {np.min(x_train[:, 52])}, max = {np.max(x_train[:, 52])}, mean = {np.mean(x_train[:, 52])};')
-        X_gen = reverse_normalize(X_gen, minimums, maximums)
-        x_train = reverse_normalize(x_train, minimums, maximums)
+              f'\nrews: min = {np.min(x_train[:, 52])}, max = {np.max(x_train[:, 52])}, mean = {np.mean(x_train[:, 52])};'
+              f'\nd: min = {np.min(x_train[:, 53])}, max = {np.max(x_train[:, 53])}, mean = {np.mean(x_train[:, 53])};')
+        X_gen = reverse_normalize_vae(X_gen, minimums, maximums)
+        x_train = reverse_normalize_vae(x_train, minimums, maximums)
         print('после обратного масштабирования')
         print('X_gen:')
         print(f'obs1: min = {np.min(X_gen[:, :24])}, max = {np.max(X_gen[:, :24])}, mean = {np.mean(X_gen[:, :24])}; '
               f'\nobs2: min = {np.min(X_gen[:, 24:48])}, max = {np.max(X_gen[:, 24:48])}, mean = {np.mean(X_gen[:, 24:48])}; '
               f'\nacts: min = {np.min(X_gen[:, 48:52])}, max = {np.max(X_gen[:, 48:52])}, mean = {np.mean(X_gen[:, 48:52])}; '
-              f'\nrews: min = {np.min(X_gen[:, 52])}, max = {np.max(X_gen[:, 52])}, mean = {np.mean(X_gen[:, 52])};')
+              f'\nrews: min = {np.min(X_gen[:, 52])}, max = {np.max(X_gen[:, 52])}, mean = {np.mean(X_gen[:, 52])};'
+              f'\nd: min = {np.min(x_train[:, 53])}, max = {np.max(x_train[:, 53])}, mean = {np.mean(x_train[:, 53])};')
         print('X_train:')
         print(
             f'obs1: min = {np.min(x_train[:, :24])}, max = {np.max(x_train[:, :24])}, mean = {np.mean(x_train[:, :24])}; '
             f'\nobs2: min = {np.min(x_train[:, 24:48])}, max = {np.max(x_train[:, 24:48])}, mean = {np.mean(x_train[:, 24:48])}; '
             f'\nacts: min = {np.min(x_train[:, 48:52])}, max = {np.max(x_train[:, 48:52])}, mean = {np.mean(x_train[:, 48:52])}; '
-            f'\nrews: min = {np.min(x_train[:, 52])}, max = {np.max(x_train[:, 52])}, mean = {np.mean(x_train[:, 52])};')
+            f'\nrews: min = {np.min(x_train[:, 52])}, max = {np.max(x_train[:, 52])}, mean = {np.mean(x_train[:, 52])};'
+            f'\nd: min = {np.min(x_train[:, 53])}, max = {np.max(x_train[:, 53])}, mean = {np.mean(x_train[:, 53])};')

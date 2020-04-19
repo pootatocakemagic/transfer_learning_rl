@@ -88,6 +88,9 @@ class BipedalWalker(gym.Env, EzPickle):
         EzPickle.__init__(self)
         self.seed()
         self.viewer = None
+        self.pos = []
+        self.pit_x = []
+        self.stump_x = []
 
         self.world = Box2D.b2World()
         self.terrain = None
@@ -154,6 +157,10 @@ class BipedalWalker(gym.Env, EzPickle):
                 y += velocity
 
             elif state==PIT and oneshot:
+                if self.pit_x and x - 3 > self.pit_x[-1]:
+                    self.pit_x += [x]
+                elif not self.pit_x:
+                    self.pit_x += [x]
                 counter = self.np_random.randint(3, 5)
                 poly = [
                     (x,              y),
@@ -176,11 +183,19 @@ class BipedalWalker(gym.Env, EzPickle):
                 original_y = y
 
             elif state==PIT and not oneshot:
+                if self.pit_x and x - 3 > self.pit_x[-1]:
+                    self.pit_x += [x]
+                elif not self.pit_x:
+                    self.pit_x += [x]
                 y = original_y
                 if counter > 1:
                     y -= 4*TERRAIN_STEP
 
             elif state==STUMP and oneshot:
+                if self.stump_x and x - 3 > self.stump_x[-1]:
+                    self.stump_x += [x]
+                elif not self.stump_x:
+                    self.stump_x += [x]
                 counter = self.np_random.randint(1, 3)
                 poly = [
                     (x,                      y),
@@ -263,6 +278,9 @@ class BipedalWalker(gym.Env, EzPickle):
             self.cloud_poly.append( (poly,x1,x2) )
 
     def reset(self):
+        self.pit_x = []
+        self.stump_x = []
+
         self._destroy()
         self.world.contactListener_bug_workaround = ContactDetector(self)
         self.world.contactListener = self.world.contactListener_bug_workaround
@@ -369,8 +387,8 @@ class BipedalWalker(gym.Env, EzPickle):
         self.world.Step(1.0/FPS, 6*30, 2*30)
 
         pos = self.hull.position
+        self.pos = pos
         vel = self.hull.linearVelocity
-
         for i in range(10):
             self.lidar[i].fraction = 1.0
             self.lidar[i].p1 = pos

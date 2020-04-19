@@ -237,7 +237,7 @@ class Sac1:
                 epoch = t // steps_per_epoch
                 test_agent(1)
                 test_ep_ret = self.apr.l_ep_ret
-                print('TestEpRet', test_ep_ret, 'Best:', test_ep_ret_best)
+                print(f'TestEpRet', test_ep_ret, 'Best:', test_ep_ret_best)
                 if test_ep_ret > test_ep_ret_best:
                     save_path = saver.save(self.sess, "content\\model.ckpt")
                     print("Model saved in path: %s" % save_path)
@@ -666,6 +666,9 @@ def sac1(apr, ts_env, env_fn, replay_buffer, vae=None, x_train=None, actor_criti
         global sess, mu, pi, q1, q2, q1_pi, q2_pi
         for j in range(n):
             o, r, d, ep_ret, ep_len = test_env.reset(), 0, False, 0, 0
+            start_pos = test_env.pos[0]
+            pit_x = test_env.pit_x
+            stump_x = test_env.stump_x
             while not (d or (ep_len == max_ep_len_test)):
                 # Take deterministic actions at test time
                 o, r, d, _ = test_env.step(get_action(o, True))
@@ -674,9 +677,19 @@ def sac1(apr, ts_env, env_fn, replay_buffer, vae=None, x_train=None, actor_criti
                 if apr.test_render:
                     frames.append(test_env.render(mode='rgb_array'))
                     # test_env.render()
+            finish_pos = test_env.pos[0]
+            count_pit = 0
+            count_stump = 0
+            for pit in pit_x:
+                if start_pos < pit < finish_pos:
+                    count_pit += 1
+            for stump in stump_x:
+                if start_pos < stump < finish_pos:
+                    count_stump += 1
             apr.l_ep_ret = int(ep_ret)
             apr.l_ep_len = ep_len
             # print(apr.l_ep_ret)
+            return count_pit, count_stump, finish_pos - start_pos, len(pit_x), len(stump_x)
 
     # --------------------------------------------
 
@@ -750,12 +763,16 @@ def sac1(apr, ts_env, env_fn, replay_buffer, vae=None, x_train=None, actor_criti
         # End of epoch wrap-up
         if t > 0 and t % steps_per_epoch == 0:
             epoch = t // steps_per_epoch
-            test_agent(1)
+            count_pit, count_stump, way, len_pit_x, len_stump_x = test_agent(1)
             test_ep_ret = apr.l_ep_ret
-            print(f'epoch = {epch}, TestEpRet', test_ep_ret, 'Best:', test_ep_ret_best)
+            print(f'epoch = {epch}, TestEpRet = {test_ep_ret}, Best = {test_ep_ret_best}, пройденный путь = {way}, из {len_pit_x} ям пройдено {count_pit}, из {len_stump_x} холмов пройдено {count_stump}')
             epch += 1
             if test_ep_ret > test_ep_ret_best:
                 save_path = saver.save(sess, "content\\model.ckpt")
                 print("Model saved in path: %s" % save_path)
                 test_ep_ret_best = test_ep_ret
-    np.savez_compressed('replay_{}'.format('трава228'), np.array(buffer))
+    np.savez_compressed('replay_{}'.format('ямы'), np.array(buffer))
+    # import imageio
+    # IMAGE_PATH = 'vae_hole.gif'
+    # tf.reset_default_graph()
+    # imageio.mimsave(IMAGE_PATH, frames, duration=1.0 / 60.0)
