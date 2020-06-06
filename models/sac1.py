@@ -497,7 +497,7 @@ class Sac2:
         act_op = self.mu if deterministic else self.pi
         return self.sess.run(act_op, feed_dict={self.x_ph: o.reshape(1, -1)})[0]
 
-def sac1(apr, ts_env, env_fn, replay_buffer, vae=None, x_train=None, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
+def sac1(apr, ts_env, env_fn, replay_buffer, name, vae=None, x_train=None, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
          steps_per_epoch=5000, epochs=100, replay_size=int(2e6), gamma=0.99, reward_scale=1.0,
          polyak=0.995, lr=5e-4, alpha=0.2, batch_size=250, start_steps=10,
          max_ep_len_train=1000, max_ep_len_test=1000, logger_kwargs=dict(), save_freq=1):
@@ -669,6 +669,7 @@ def sac1(apr, ts_env, env_fn, replay_buffer, vae=None, x_train=None, actor_criti
             start_pos = test_env.pos[0]
             pit_x = test_env.pit_x
             stump_x = test_env.stump_x
+            stairs_x = test_env.stairs_x
             while not (d or (ep_len == max_ep_len_test)):
                 # Take deterministic actions at test time
                 o, r, d, _ = test_env.step(get_action(o, True))
@@ -680,16 +681,20 @@ def sac1(apr, ts_env, env_fn, replay_buffer, vae=None, x_train=None, actor_criti
             finish_pos = test_env.pos[0]
             count_pit = 0
             count_stump = 0
+            count_stairs = 0
             for pit in pit_x:
                 if start_pos < pit < finish_pos:
                     count_pit += 1
             for stump in stump_x:
                 if start_pos < stump < finish_pos:
                     count_stump += 1
+            for stair in stairs_x:
+                if start_pos < stair < finish_pos:
+                    count_stairs += 1
             apr.l_ep_ret = int(ep_ret)
             apr.l_ep_len = ep_len
             # print(apr.l_ep_ret)
-            return count_pit, count_stump, finish_pos - start_pos, len(pit_x), len(stump_x)
+            return count_pit, count_stump, count_stairs, finish_pos - start_pos, len(pit_x), len(stump_x), len(stairs_x)
 
     # --------------------------------------------
 
@@ -733,8 +738,8 @@ def sac1(apr, ts_env, env_fn, replay_buffer, vae=None, x_train=None, actor_criti
             ep_len += 1
             replay_buffer.store(o, a, r, o2, d)
         elif x_train is not None:
-            # data = x_train[count]
-            data = random.choice(x_train)
+            data = x_train[count]
+            # data = random.choice(x_train)
             o, o2, a, r, d = data
             count += 1
             ep_ret += r
@@ -750,6 +755,8 @@ def sac1(apr, ts_env, env_fn, replay_buffer, vae=None, x_train=None, actor_criti
             """
             for j in range(ep_len):
                 batch = replay_buffer.sample_batch(batch_size)
+                print(batch['obs1'].shape)
+                exit()
                 feed_dict = {x_ph: batch['obs1'],
                              x2_ph: batch['obs2'],
                              apr.ph: batch['acts'],
@@ -763,15 +770,16 @@ def sac1(apr, ts_env, env_fn, replay_buffer, vae=None, x_train=None, actor_criti
         # End of epoch wrap-up
         if t > 0 and t % steps_per_epoch == 0:
             epoch = t // steps_per_epoch
-            count_pit, count_stump, way, len_pit_x, len_stump_x = test_agent(1)
+            count_pit, count_stump, count_stairs, way, len_pit_x, len_stump_x, len_stairs = test_agent(1)
             test_ep_ret = apr.l_ep_ret
-            print(f'epoch = {epch}, TestEpRet = {test_ep_ret}, Best = {test_ep_ret_best}, пройденный путь = {way}, из {len_pit_x} ям пройдено {count_pit}, из {len_stump_x} холмов пройдено {count_stump}')
+            print(f'epoch = {epch}, TestEpRet = {test_ep_ret}, Best = {test_ep_ret_best}, пройденный путь = {way}, из {len_pit_x} ям пройдено {count_pit}, из {len_stump_x} холмов пройдено {count_stump}'
+                  f', из {len_stairs} лестниц пройдено {count_stairs}')
             epch += 1
             if test_ep_ret > test_ep_ret_best:
                 save_path = saver.save(sess, "content\\model.ckpt")
                 print("Model saved in path: %s" % save_path)
                 test_ep_ret_best = test_ep_ret
-    np.savez_compressed('replay_{}'.format('ямы'), np.array(buffer))
+    np.savez_compressed('replay_{}'.format(name), np.array(buffer))
     # import imageio
     # IMAGE_PATH = 'vae_hole.gif'
     # tf.reset_default_graph()

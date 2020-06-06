@@ -91,6 +91,7 @@ class BipedalWalker(gym.Env, EzPickle):
         self.pos = []
         self.pit_x = []
         self.stump_x = []
+        self.stairs_x = []
 
         self.world = Box2D.b2World()
         self.terrain = None
@@ -210,6 +211,10 @@ class BipedalWalker(gym.Env, EzPickle):
                 self.terrain.append(t)
 
             elif state==STAIRS and oneshot:
+                if self.stairs_x and x - 3 > self.stairs_x[-1]:
+                    self.stairs_x += [x]
+                elif not self.stairs_x:
+                    self.stairs_x += [x]
                 stair_height = +1 if self.np_random.rand() > 0.5 else -1
                 stair_width = self.np_random.randint(4, 5)
                 stair_steps = self.np_random.randint(3, 5)
@@ -516,6 +521,14 @@ class BWpit(BipedalWalker):
     STAIRS = 7
     PIT = 1
     _STATES_ = 2
+
+class BWstapit(BipedalWalker):
+    hardcore = True
+    GRASS = 0
+    STUMP = 7
+    STAIRS = 1
+    PIT = 2
+    _STATES_ = 3
 
 class Wrapper(object):
 

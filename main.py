@@ -1,7 +1,7 @@
 from lib.aparam import aparam
 from lib.replay_buffer import ReplayBuffer
 from spinup.utils.run_utils import setup_logger_kwargs
-from lib.env import Wrapper, BWg, BWpit, BWstu
+from lib.env import Wrapper, BWg, BWpit, BWstu, BWstapit
 from models.sac1 import sac1
 from spinup.algos.sac1 import core
 import numpy as np
@@ -15,6 +15,7 @@ ENV = 'ямы' # возможные значения 'трава' 'ямы' 'пн
 # print(x_train[0][0])
 # exit()
 if GET_REPLAY_BUFFER:
+
       apr = aparam()
       replay_buffer = ReplayBuffer(24, 4, int(2e6))
       logger_kwargs = setup_logger_kwargs(apr.exp_name, apr.seed)
@@ -30,14 +31,19 @@ if GET_REPLAY_BUFFER:
             env3 = Wrapper(BWstu(), apr, 3)     # пни
             env1 = BWstu()
             ts_env = BWstu()
+      elif ENV == 'Лестницы':
+            env3 = Wrapper(BWstapit(), apr, 3)  # лестницы и ямы
+            env1 = BWstapit()
+            ts_env = BWstapit()
       else:
             print('задайте корректное окружение(ENV) возможные - трава, ямы, пни')
             exit()
-      sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, actor_critic=core.mlp_actor_critic,
+      sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, ENV, actor_critic=core.mlp_actor_critic,
             ac_kwargs=dict(hidden_sizes=[400, 300]),
             gamma=apr.gamma, seed=apr.seed, epochs=apr.epochs, alpha=apr.alpha,
             logger_kwargs=logger_kwargs, lr=apr.lr, reward_scale=apr.reward_scale, start_steps = apr.start_steps,
             max_ep_len_train=apr.max_ep_len_train, max_ep_len_test=apr.max_ep_len_test)
+
       # ep = 100
       # print(replay_buffer.size)
       # print(replay_buffer.max_size)
@@ -84,7 +90,7 @@ if FIT_VAE_TEST_AGENT:
             print('задайте корректное окружение(ENV) возможные - трава, ямы, пни')
             exit()
       ts_env = BWg()
-      sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, x_train=x_train, vae=None, actor_critic=core.mlp_actor_critic,
+      sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, x_train=None, vae=vae, actor_critic=core.mlp_actor_critic,
            ac_kwargs=dict(hidden_sizes=[400, 300]),
            gamma=apr.gamma, seed=apr.seed, epochs=apr.epochs, alpha=apr.alpha,
            logger_kwargs=logger_kwargs, lr=apr.lr, reward_scale=apr.reward_scale, start_steps=apr.start_steps,

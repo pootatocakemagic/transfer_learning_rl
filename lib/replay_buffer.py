@@ -39,3 +39,13 @@ class ReplayBuffer:
                     acts=self.acts_buf[idxs],
                     rews=self.rews_buf[idxs],
                     done=self.done_buf[idxs])
+
+    def sample_batch2(self, replay_buffer2, batch_size=32, batch_size2=32):
+        idxs = np.random.randint(0, self.size, size=batch_size)
+        idxs2 = np.random.randint(0, replay_buffer2.size, size=batch_size2)
+
+        return dict(obs1=np.vstack((replay_buffer2.obs1_buf[idxs2], self.obs1_buf[idxs])),
+                    obs2=np.vstack((replay_buffer2.obs2_buf[idxs2], self.obs2_buf[idxs])),
+                    acts=np.vstack((replay_buffer2.acts_buf[idxs2], self.acts_buf[idxs])),
+                    rews=np.hstack((replay_buffer2.rews_buf[idxs2], self.rews_buf[idxs])),
+                    done=np.hstack((replay_buffer2.done_buf[idxs2], self.done_buf[idxs])))

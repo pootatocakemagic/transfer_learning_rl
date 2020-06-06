@@ -14,7 +14,7 @@ STRUCTURE_DECODER = [[16, 'relu'],
                      ]
 OUTPUT_FN_ACTIVATION = 'relu'
 # данная переменная отвечает за количество эпох при обучении vae
-EPOCHS = 2
+EPOCHS = 10
 BATCH_SIZE = 128
 VALIDATION_SPLIT = 0.2
 STRUCTURE_DENSE = [[32, 'relu'],
