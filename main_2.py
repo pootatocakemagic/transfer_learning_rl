@@ -2,7 +2,7 @@ from lib.aparam import aparam
 from lib.replay_buffer import ReplayBuffer
 from spinup.utils.run_utils import setup_logger_kwargs
 from lib.env import Wrapper, BWg, BWpit, BWstu, BWstapit
-from models.sac1_agent_c import sac1
+from models.sac1_agent_c import train_test
 from spinup.algos.sac1 import core
 import numpy as np
 from models.vae import Vae
@@ -22,7 +22,7 @@ logger_kwargs = setup_logger_kwargs(apr.exp_name, apr.seed)
 env3 = Wrapper(BWstapit(), apr, 3)     # лестницы и ямы
 env1 = BWstapit()
 ts_env = BWstapit()
-sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, replay_buffer2, actor_critic=core.mlp_actor_critic,
+train_test(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, replay_buffer2, actor_critic=core.mlp_actor_critic,
             ac_kwargs=dict(hidden_sizes=[400, 300]),
             gamma=apr.gamma, seed=apr.seed, epochs=apr.epochs, alpha=apr.alpha,
             logger_kwargs=logger_kwargs, lr=apr.lr, reward_scale=apr.reward_scale, start_steps=apr.start_steps,

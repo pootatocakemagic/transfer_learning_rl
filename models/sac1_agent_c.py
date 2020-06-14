@@ -63,189 +63,75 @@ def get_batch_exp_c(replay_buffer1, replay_buffer2, batch_size = 128):
     count += 1
     return res
 
-# def get_batch_exp_d(replay_buffer1, replay_buffer2, batch_size = 128):
-#     global data, count, part
-#     if count < N:
-#         obs1_1 = replay_buffer1[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 0]
-#         obs2_1 = replay_buffer1[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 1]
-#         action_1 = replay_buffer1[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 2]
-#         reward_1 = replay_buffer1[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 3]
-#         d_1 = replay_buffer1[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 4]
-#         obs1_2 = replay_buffer2[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 0]
-#         obs2_2 = replay_buffer2[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 1]
-#         action_2 = replay_buffer2[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 2]
-#         reward_2 = replay_buffer2[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 3]
-#         d_2 = replay_buffer2[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 4]
-#     elif count >= N:
-#         # print('hey')
-#         part += 1
-#         if part > 9:
-#             part = 0
-#
-#         # print('updated', count, len(data[0]))
-#         count = 1
-#         obs1_1 = replay_buffer1[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-#                  0]
-#         obs2_1 = replay_buffer1[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-#                  1]
-#         action_1 = replay_buffer1[
-#                    part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 2]
-#         reward_1 = replay_buffer1[
-#                    part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 3]
-#         d_1 = replay_buffer1[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 4]
-#         obs1_2 = replay_buffer2[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-#                  0]
-#         obs2_2 = replay_buffer2[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-#                  1]
-#         action_2 = replay_buffer2[
-#                    part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 2]
-#         reward_2 = replay_buffer2[
-#                    part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 3]
-#         d_2 = replay_buffer2[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 4]
-#     idxs2 = np.random.randint(0, len(obs1_2)-1, size=batch_size)
-#     # print('!!!!', np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))).shape)
-#     # print(np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))).shape)
-#     # print(np.vstack((tuple(obs2_1[idxs2]), tuple(obs2_2[idxs2]))).shape)
-#     # print(np.vstack((tuple(action_1[idxs2]), tuple(action_2[idxs2]))).shape)
-#     # print(np.hstack((tuple(reward_1[idxs2]), tuple(reward_2[idxs2]))).shape)
-#     # print(np.hstack((tuple(d_1[idxs2]), tuple(d_2[idxs2]))).shape)
-#     # print(obs1_1[idxs2][0])
-#     # exit()
-#     res = dict(obs1=np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))),
-#          obs2=np.vstack((tuple(obs2_1[idxs2]), tuple(obs2_2[idxs2]))),
-#          acts=np.vstack((tuple(action_1[idxs2]), tuple(action_2[idxs2]))),
-#          rews=np.hstack((tuple(reward_1[idxs2]), tuple(reward_2[idxs2]))),
-#          done=np.hstack((tuple(d_1[idxs2]), tuple(d_2[idxs2]))))
-#     count += 1
-#     return res
-
 def get_batch_exp_d(replay_buffer1, replay_buffer2, batch_size = 128):
+    """ Сэмплирует по порядку из двух буферов в N секциях.
+    При этом размер сэмпла одинаковый для обоих буферов.
+    """
     global data, count, part
-    if count < N:
-        obs1_1 = replay_buffer1[:(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-                 0]
-        obs2_1 = replay_buffer1[:(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-                 1]
-        action_1 = replay_buffer1[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 2]
-        reward_1 = replay_buffer1[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 3]
-        d_1 = replay_buffer1[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 4]
-        obs1_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-                 0]
-        obs2_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-                 1]
-        action_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 2]
-        reward_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 3]
-        d_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 4]
-    elif count >= N:
-        # print('hey')
-        part += 1
-        if part > 9:
-            part = 0
 
-        # print('updated', count, len(data[0]))
+    current_max_1 = (part + 1) * replay_buffer1.shape[0]// 10
+    current_max_2 = (part + 1) * replay_buffer1.shape[0]// 10
+    indexes_1 = np.random.choice(current_max_1, batch_size, replace=False)
+    indexes_2 = np.random.choice(current_max_2, batch_size, replace=False)
+
+    obs1_1, obs2_1, action_1, reward_1, d_1 = sample_from_buffer(replay_buffer1, indexes_1)
+    obs1_2, obs2_2, action_2, reward_2, d_2 = sample_from_buffer(replay_buffer2, indexes_2)
+
+    if count == N:
+        if part < 9:
+            part += 1
+
         count = 1
-        obs1_1 = replay_buffer1[:(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-                 0]
-        obs2_1 = replay_buffer1[:(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-                 1]
-        action_1 = replay_buffer1[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 2]
-        reward_1 = replay_buffer1[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 3]
-        d_1 = replay_buffer1[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 4]
-        obs1_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-                 0]
-        obs2_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-                 1]
-        action_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 2]
-        reward_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 3]
-        d_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 4]
-    idxs2 = np.random.randint(0, len(obs1_2)-1, size=batch_size)
-    # print('!!!!', np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))).shape)
-    # print(np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))).shape)
-    # print(np.vstack((tuple(obs2_1[idxs2]), tuple(obs2_2[idxs2]))).shape)
-    # print(np.vstack((tuple(action_1[idxs2]), tuple(action_2[idxs2]))).shape)
-    # print(np.hstack((tuple(reward_1[idxs2]), tuple(reward_2[idxs2]))).shape)
-    # print(np.hstack((tuple(d_1[idxs2]), tuple(d_2[idxs2]))).shape)
-    # print(obs1_1[idxs2][0])
-    # exit()
-    res = dict(obs1=np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))),
-         obs2=np.vstack((tuple(obs2_1[idxs2]), tuple(obs2_2[idxs2]))),
-         acts=np.vstack((tuple(action_1[idxs2]), tuple(action_2[idxs2]))),
-         rews=np.hstack((tuple(reward_1[idxs2]), tuple(reward_2[idxs2]))),
-         done=np.hstack((tuple(d_1[idxs2]), tuple(d_2[idxs2]))))
+
+    res = dict(obs1=np.vstack((obs1_1, obs1_2)),
+               obs2=np.vstack((obs2_1, obs2_2)),
+               acts=np.vstack((action_1, action_2)),
+               rews=np.hstack((reward_1, reward_2)),
+               done=np.hstack((d_1, d_2)))
     count += 1
     return res
+
+def sample_from_buffer(buffer, indexes):
+    obs1 = buffer[indexes, 0]
+    obs2 = buffer[indexes, 1]
+    action = buffer[indexes, 2]
+    reward = buffer[indexes, 3]
+    done = buffer[indexes, 4]
+
+    return obs1, obs2, action, reward, done
 
 def get_batch_exp_z(replay_buffer1, replay_buffer2, batch_size_1, batch_size_2):
-    global data, count
-    if count == 0:
-        obs1_1 = replay_buffer1[:, 0]
-        obs2_1 = replay_buffer1[:, 1]
-        action_1 = replay_buffer1[:, 2]
-        reward_1 = replay_buffer1[:, 3]
-        d_1 = replay_buffer1[:, 4]
-        obs1_2 = replay_buffer2[:, 0]
-        obs2_2 = replay_buffer2[:, 1]
-        action_2 = replay_buffer2[:, 2]
-        reward_2 = replay_buffer2[:, 3]
-        d_2 = replay_buffer2[:, 4]
-        temp = list(zip(obs1_1, obs2_1, action_1, reward_1, d_1, obs1_2, obs2_2, action_2, reward_2, d_2))
-        random.shuffle(temp)
-        obs1_1, obs2_1, action_1, reward_1, d_1, obs1_2, obs2_2, action_2, reward_2, d_2 = zip(*temp)
-        data = [obs1_1, obs2_1, action_1, reward_1, d_1, obs1_2, obs2_2, action_2, reward_2, d_2]
-    elif count < len(data[0]) // (batch_size_1 + batch_size_2):
-        obs1_1, obs2_1, action_1, reward_1, d_1, obs1_2, obs2_2, action_2, reward_2, d_2 = data
-    elif count >= len(data[0]) // (batch_size_1 + batch_size_2):
-        # print('updated', count, len(data[0]))
-        count = 0
-        obs1_1 = replay_buffer1[:, 0]
-        obs2_1 = replay_buffer1[:, 1]
-        action_1 = replay_buffer1[:, 2]
-        reward_1 = replay_buffer1[:, 3]
-        d_1 = replay_buffer1[:, 4]
-        obs1_2 = replay_buffer2[:, 0]
-        obs2_2 = replay_buffer2[:, 1]
-        action_2 = replay_buffer2[:, 2]
-        reward_2 = replay_buffer2[:, 3]
-        d_2 = replay_buffer2[:, 4]
-        temp = list(zip(obs1_1, obs2_1, action_1, reward_1, d_1, obs1_2, obs2_2, action_2, reward_2, d_2))
-        random.shuffle(temp)
-        obs1_1, obs2_1, action_1, reward_1, d_1, obs1_2, obs2_2, action_2, reward_2, d_2 = zip(*temp)
-        data = [obs1_1, obs2_1, action_1, reward_1, d_1, obs1_2, obs2_2, action_2, reward_2, d_2]
+    """ Сэмплирует случайно из двух буферов с разным соотношением элементов 
+    (количество элементов для сэмпла свое для каждого буфера)
+    """
+    # global data, count
+
+    indexes_1 = np.random.choice(replay_buffer1.shape[0], batch_size_1, replace=False)
+    indexes_2 = np.random.choice(replay_buffer2.shape[0], batch_size_2, replace=False)
+
+    obs1_1, obs2_1, action_1, reward_1, d_1 = sample_from_buffer(replay_buffer1, indexes_1)
+    obs1_2, obs2_2, action_2, reward_2, d_2 = sample_from_buffer(replay_buffer2, indexes_2)
+
     if batch_size_2 == 0:
-        res = dict(obs1=obs1_1[count * batch_size_1:(count + 1) * batch_size_1],
-            obs2=obs2_1[count * batch_size_1:(count + 1) * batch_size_1],
-            acts=action_1[count * batch_size_1:(count + 1) * batch_size_1],
-            rews=reward_1[count * batch_size_1:(count + 1) * batch_size_1],
-            done=d_1[count * batch_size_1:(count + 1) * batch_size_1])
+        res = dict(obs1=obs1_1,
+                   obs2=obs2_1,
+                   acts=action_1,
+                   rews=reward_1,
+                   done=d_1)
     else:
-        res = dict(obs1=np.vstack(
-            (obs1_1[count * batch_size_1:(count + 1) * batch_size_1], obs1_2[count * batch_size_2:(count + 1) * batch_size_2])),
-                   obs2=np.vstack((obs2_1[count * batch_size_1:(count + 1) * batch_size_1],
-                                   obs2_2[count * batch_size_2:(count + 1) * batch_size_2])),
-                   acts=np.vstack((action_1[count * batch_size_1:(count + 1) * batch_size_1],
-                                   action_2[count * batch_size_2:(count + 1) * batch_size_2])),
-                   rews=np.hstack((reward_1[count * batch_size_1:(count + 1) * batch_size_1],
-                                   reward_2[count * batch_size_2:(count + 1) * batch_size_2])),
-                   done=np.hstack((d_1[count * batch_size_1:(count + 1) * batch_size_1],
-                                   d_2[count * batch_size_2:(count + 1) * batch_size_2])))
-    count += 1
+        res = dict(obs1=np.vstack((obs1_1, obs1_2)),
+                   obs2=np.vstack((obs2_1, obs2_2)),
+                   acts=np.vstack((action_1, action_2)),
+                   rews=np.hstack((reward_1, reward_2)),
+                   done=np.hstack((d_1, d_2)))
     return res
 
 
-def sac1(apr, ts_env, env_fn, replay_buffer, replay_buffer2, vae=None, x_train=None, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
+def train_test(apr, ts_env, env_fn, replay_buffer, replay_buffer2, vae=None, x_train=None, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
          steps_per_epoch=5000, epochs=100, replay_size=int(2e6), gamma=0.99, reward_scale=1.0,
          polyak=0.995, lr=5e-4, alpha=0.2, batch_size=250, start_steps=10,
          max_ep_len_train=1000, max_ep_len_test=1000, logger_kwargs=dict(), save_freq=1):
-    #   '''
-    # def sac1(apr,ts_env, env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
-    #          steps_per_epoch=5000, epochs=100, replay_size=int(2e6), gamma=0.99, reward_scale=1.0,
-    #          polyak=0.995, lr=5e-4, alpha=0.2, batch_size=250, start_steps=10000,
-    #          max_ep_len_train=1000, max_ep_len_test=1000, logger_kwargs=dict(), save_freq=1):
-    #   '''
 
-    # if not apr.is_test:
-    # logger = EpochLogger(**logger_kwargs)
-    # logger.save_config(locals())
     frames = []
     buffer = []
 
@@ -373,32 +259,8 @@ def sac1(apr, ts_env, env_fn, replay_buffer, replay_buffer2, vae=None, x_train=N
         act_op = mu if deterministic else pi
         return sess.run(act_op, feed_dict={x_ph: o.reshape(1, -1)})[0]
 
-    ##############################  test  ############################
-
-    if apr.is_test:
-        # test_env = gym.make(a_env)
-        test_env = ts_env
-        # test_env = BWg()
-        ave_ep_ret = 0
-        for j in range(start_steps):
-            o, r, d, ep_ret, ep_len = test_env.reset(), 0, False, 0, 0
-            while not (d or (ep_len == max_ep_len_test)):
-                action = get_action(o, True)
-                o, r, d, _ = test_env.step(action)
-                ep_ret += r
-                ep_len += 1
-                if apr.test_render:
-                    frames.append(test_env.render(mode='rgb_array'))
-                    # test_env.render()
-            ave_ep_ret = (j * ave_ep_ret + ep_ret) / (j + 1)
-            print('ep_len', ep_len, 'ep_ret:', ep_ret, 'ave_ep_ret:', ave_ep_ret, '--- {}  /'.format(j + 1),
-                  start_steps)
-        return
-
-    ##############################  train  ############################
-
+    ##############################  test for train process ############################
     def test_agent(n=25):
-        global sess, mu, pi, q1, q2, q1_pi, q2_pi
         for j in range(n):
             o, r, d, ep_ret, ep_len = test_env.reset(), 0, False, 0, 0
             start_pos = test_env.pos[0]
@@ -431,8 +293,7 @@ def sac1(apr, ts_env, env_fn, replay_buffer, replay_buffer2, vae=None, x_train=N
             # print(apr.l_ep_ret)
             return count_pit, count_stump, count_stairs, finish_pos - start_pos, len(pit_x), len(stump_x), len(stairs_x)
 
-    # --------------------------------------------
-
+    ##############################  train ############################
     start_time = time.time()
     if vae is None and x_train is None:
         o, r, d, ep_ret, ep_len = env.reset(), 0, False, 0, 0
