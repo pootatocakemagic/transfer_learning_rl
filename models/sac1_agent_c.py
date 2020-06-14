@@ -447,13 +447,15 @@ def sac1(apr, ts_env, env_fn, replay_buffer, replay_buffer2, vae=None, x_train=N
 
     test_ep_ret = -10000.0
     test_ep_ret_best = apr.bestr
-    n = 100
+    n = 50
     min_n = 50
-    m = 0
+    m = 50
     max_m = 50
-    mix_offset = 5  # отвечает за число шагов после которых начинается смешивание буферов
+    mix_offset = 5000000000  # отвечает за число шагов после которых начинается смешивание буферов
     mix_step = 1 # определяет за какое число шагов смешивание изменяется на единицу
     # Main loop: collect experience in env and update/log each epoch
+    batch1 = get_batch_exp_z(replay_buffer, replay_buffer2, n, m)
+    batch2 = get_batch_exp_z(replay_buffer, replay_buffer2, n, m)
     for t in range(total_steps):
         for j in range(5000):
             # t = time.time()
@@ -476,12 +478,14 @@ def sac1(apr, ts_env, env_fn, replay_buffer, replay_buffer2, vae=None, x_train=N
         epoch = t
         count_pit, count_stump, count_stairs, way, len_pit_x, len_stump_x, len_stairs = test_agent(1)
         test_ep_ret = apr.l_ep_ret
-        print(f'epoch = {epch}, TestEpRet = {test_ep_ret}, Best = {test_ep_ret_best}, пройденный путь = {way}, из {len_pit_x} ям пройдено {count_pit}, из {len_stairs} лестниц пройдено {count_stairs}')
+        print(f'epoch = {epch}, TestEpRet = {test_ep_ret}, Best = {test_ep_ret_best}, пройденный путь = {way},ям - {count_pit}/{len_pit_x}, лестниц - {count_stairs}/{len_stairs}')
+        if (count_pit + count_stairs)/(len_pit_x+len_stairs) > 0.8:
+            exit()
         epch += 1
-        if test_ep_ret > test_ep_ret_best:
-            save_path = saver.save(sess, "content\\model.ckpt")
-            print("Model saved in path: %s" % save_path)
-            test_ep_ret_best = test_ep_ret
+        # if test_ep_ret > test_ep_ret_best:
+        #     save_path = saver.save(sess, "content\\model.ckpt")
+        #     print("Model saved in path: %s" % save_path)
+        #     test_ep_ret_best = test_ep_ret
     # np.savez_compressed('replay_{}'.format('ямы'), np.array(buffer))
     # import imageio
     # IMAGE_PATH = 'vae_hole.gif'

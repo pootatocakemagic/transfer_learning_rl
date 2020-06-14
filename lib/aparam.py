@@ -10,7 +10,7 @@ class aparam:
         self.gamma = 0.99
         self.lr = 1e-4
         self.seed = 0
-        self.epochs = 40 # 100000
+        self.epochs = 4000  # 100000
         self.alpha = 0.1
         self.reward_scale = 5.0
         self.act_noise = 0.3

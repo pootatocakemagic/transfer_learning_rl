@@ -755,8 +755,6 @@ def sac1(apr, ts_env, env_fn, replay_buffer, name, vae=None, x_train=None, actor
             """
             for j in range(ep_len):
                 batch = replay_buffer.sample_batch(batch_size)
-                print(batch['obs1'].shape)
-                exit()
                 feed_dict = {x_ph: batch['obs1'],
                              x2_ph: batch['obs2'],
                              apr.ph: batch['acts'],
