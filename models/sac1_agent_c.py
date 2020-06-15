@@ -30,6 +30,8 @@ def get_batch_exp_c(replay_buffer1, replay_buffer2, batch_size = 128):
         temp = list(zip(obs1_1, obs2_1, action_1, reward_1, d_1, obs1_2, obs2_2, action_2, reward_2, d_2))
         random.shuffle(temp)
         obs1_1, obs2_1, action_1, reward_1, d_1, obs1_2, obs2_2, action_2, reward_2, d_2 = zip(*temp)
+        print(obs1_1.shape, d_1.shape)
+        exit()
         data = [obs1_1, obs2_1, action_1, reward_1, d_1, obs1_2, obs2_2, action_2, reward_2, d_2]
     elif count < len(data[0]) // batch_size:
         obs1_1, obs2_1, action_1, reward_1, d_1, obs1_2, obs2_2, action_2, reward_2, d_2 = data
@@ -92,11 +94,11 @@ def get_batch_exp_d(replay_buffer1, replay_buffer2, batch_size = 128):
     return res
 
 def sample_from_buffer(buffer, indexes):
-    obs1 = buffer[indexes, 0]
-    obs2 = buffer[indexes, 1]
-    action = buffer[indexes, 2]
-    reward = buffer[indexes, 3]
-    done = buffer[indexes, 4]
+    obs1 = tuple(buffer[indexes, 0])
+    obs2 = tuple(buffer[indexes, 1])
+    action = tuple(buffer[indexes, 2])
+    reward = tuple(buffer[indexes, 3])
+    done = tuple(buffer[indexes, 4])
 
     return obs1, obs2, action, reward, done
 
@@ -313,7 +315,7 @@ def train_test(apr, ts_env, env_fn, replay_buffer, replay_buffer2, vae=None, x_t
     m = 50
     max_m = 50
     mix_offset = 5000000000  # отвечает за число шагов после которых начинается смешивание буферов
-    mix_step = 1 # определяет за какое число шагов смешивание изменяется на единицу
+    mix_step = 1  # определяет за какое число шагов смешивание изменяется на единицу
     # Main loop: collect experience in env and update/log each epoch
     batch1 = get_batch_exp_z(replay_buffer, replay_buffer2, n, m)
     batch2 = get_batch_exp_z(replay_buffer, replay_buffer2, n, m)

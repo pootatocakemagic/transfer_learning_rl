@@ -1,6 +1,6 @@
 class aparam:
     def __init__(self):
-        self.is_restore_train = False
+        self.is_restore_train = True
         self.is_test = False
         self.test_render = False
         self.max_ep_len_test = 2000
