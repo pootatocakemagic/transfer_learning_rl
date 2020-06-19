@@ -702,7 +702,7 @@ def sac1(apr, ts_env, env_fn, replay_buffer, name, vae=None, x_train=None, actor
     if vae is None and x_train is None:
         o, r, d, ep_ret, ep_len = env.reset(), 0, False, 0, 0
     elif vae is not None:
-        o, r, d, ep_ret, ep_len = vae.get_data()[0], 0, False, 0, 0
+        o, r, d, ep_ret, ep_len = vae[0].get_data()[0], 0, False, 0, 0
     elif x_train is not None:
         count = 0
         data = x_train[count]
@@ -733,8 +733,8 @@ def sac1(apr, ts_env, env_fn, replay_buffer, name, vae=None, x_train=None, actor
             buffer += [[o, o2, a, r, d]]
             o = o2
         elif vae is not None:
-            o, o2, a, r, d = vae.get_data()
-            ep_ret += r
+            o_1, o2_1, a_1, r_1, d_1 = vae.get_data()
+            ep_ret += r_1
             ep_len += 1
             replay_buffer.store(o, a, r, o2, d)
         elif x_train is not None:

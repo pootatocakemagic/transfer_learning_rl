@@ -3,13 +3,14 @@ from lib.replay_buffer import ReplayBuffer
 from spinup.utils.run_utils import setup_logger_kwargs
 from lib.env import Wrapper, BWg, BWpit, BWstu, BWstapit
 from models.sac1 import sac1
+from models.sac1_vae_agents import sac1 as sac
 from spinup.algos.sac1 import core
 import numpy as np
 from models.vae import Vae
 import config
-
-GET_REPLAY_BUFFER = True
-FIT_VAE_TEST_AGENT = False
+import pickle
+GET_REPLAY_BUFFER = False
+FIT_VAE_TEST_AGENT = True
 ENV = 'ямы' # возможные значения 'трава' 'ямы' 'пни'
 # x_train = np.load('replay_{}.npz'.format("трава228"), allow_pickle=True)['arr_0']
 # print(x_train[0][0])
@@ -58,21 +59,35 @@ if GET_REPLAY_BUFFER:
       # np.savez_compressed('replay_{}'.format(ENV), np_skill)
 
 if FIT_VAE_TEST_AGENT:
-      vae = Vae(config)
-      # x_train = np.load('replay_{}.npz'.format(ENV))['arr_0']
-      x_train = np.load('replay_{}.npz'.format(ENV), allow_pickle=True)['arr_0']
-      y = np.array([np.array(xi) for xi in x_train[:, 0]])
-      for i in range(1, 5):
-            if i < 3:
-                  temp = np.array([np.array(xi) for xi in x_train[:, i]])
-            else:
-                  temp = np.array([np.array(xi) for xi in x_train[:, i]]).reshape(-1, 1)
-            y = np.concatenate([y, temp], axis=1)
-      vae.fit_vae(y)
-
-      vae.testing(y)
+      # vae1 = Vae(config)
+      # # x_train = np.load('replay_{}.npz'.format(ENV))['arr_0']
+      # x_train = np.load('replay_лестницы.npz', allow_pickle=True)['arr_0']
+      # y = np.array([np.array(xi) for xi in x_train[:, 0]])
+      # for i in range(1, 5):
+      #       if i < 3:
+      #             temp = np.array([np.array(xi) for xi in x_train[:, i]])
+      #       else:
+      #             temp = np.array([np.array(xi) for xi in x_train[:, i]]).reshape(-1, 1)
+      #       y = np.concatenate([y, temp], axis=1)
+      # vae1.fit_vae(y)
+      #
+      # vae1.testing(y)
+      # vae1.save_model('vae1.h5')
+      # vae2 = Vae(config)
+      # # x_train = np.load('replay_{}.npz'.format(ENV))['arr_0']
+      # x_train = np.load('replay_ямы.npz', allow_pickle=True)['arr_0']
+      # y = np.array([np.array(xi) for xi in x_train[:, 0]])
+      # for i in range(1, 5):
+      #       if i < 3:
+      #             temp = np.array([np.array(xi) for xi in x_train[:, i]])
+      #       else:
+      #             temp = np.array([np.array(xi) for xi in x_train[:, i]]).reshape(-1, 1)
+      #       y = np.concatenate([y, temp], axis=1)
+      # vae2.fit_vae(y)
+      # vae2.testing(y)
+      # vae2.save_model('vae2.h5')
       apr = aparam()
-      replay_buffer = ReplayBuffer(24, 4, int(2e6))
+      # replay_buffer = ReplayBuffer(24, 4, int(2e6))
       logger_kwargs = setup_logger_kwargs(apr.exp_name, apr.seed)
       if ENV == 'трава':
             env3 = Wrapper(BWg(), apr, 3)     # трава
@@ -89,8 +104,11 @@ if FIT_VAE_TEST_AGENT:
       else:
             print('задайте корректное окружение(ENV) возможные - трава, ямы, пни')
             exit()
-      ts_env = BWg()
-      sac1(apr, ts_env, lambda n: env3 if n == 3 else env1, replay_buffer, x_train=None, vae=vae, actor_critic=core.mlp_actor_critic,
+      env3 = Wrapper(BWstapit(), apr, 3)  # лестницы и ямы
+      env1 = BWstapit()
+      ts_env = BWstapit()
+      # vae2 = [1,2]
+      sac(apr, ts_env, lambda n: env3 if n == 3 else env1, x_train=None, actor_critic=core.mlp_actor_critic,
            ac_kwargs=dict(hidden_sizes=[400, 300]),
            gamma=apr.gamma, seed=apr.seed, epochs=apr.epochs, alpha=apr.alpha,
            logger_kwargs=logger_kwargs, lr=apr.lr, reward_scale=apr.reward_scale, start_steps=apr.start_steps,

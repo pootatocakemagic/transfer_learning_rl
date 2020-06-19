@@ -62,3 +62,6 @@ def reverse_normalize_vae(data, minimums, maximums):
     data[:, 52] = (maximums[3] * data[:, 52]) - minimums[3]
     data[:, 53] = (maximums[4] * data[:, 53]) - minimums[4]
     return data
+
+def validate(a):
+    return

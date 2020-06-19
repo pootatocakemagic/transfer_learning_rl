@@ -90,21 +90,21 @@ class Vae:
         # self.vae.fit(x_train, x_train, epochs=self.config.EPOCHS, batch_size=self.config.BATCH_SIZE,
         #              validation_split=self.config.VALIDATION_SPLIT)
 
-    def save_model(self):
-        self.decoder.save_weights("model_vae.h5")
+    def save_model(self, name="model_vae.h5"):
+        self.decoder.save_weights(name)
 
-    def load_model(self):
-        self.decoder.load_weights("model_vae.h5")
+    def load_model(self, name="model_vae.h5"):
+        self.decoder.load_weights(name)
 
-    def get_data(self):
-        z_sample = np.random.randn(1, self.config.LATENT_DIM)
+    def get_data(self, batch_size=1):
+        z_sample = np.random.randn(batch_size, self.config.LATENT_DIM)
         X_batch = self.decoder.predict(z_sample)
-        X_batch = reverse_normalize_vae(X_batch, self.minimums, self.maximums)[0]
-        obs1 = X_batch[:24]
-        obs2 = X_batch[24:48]
-        acts = X_batch[48:52]
-        rews = X_batch[52]
-        d = False
+        X_batch = reverse_normalize_vae(X_batch, self.minimums, self.maximums)
+        obs1 = X_batch[:, :24]
+        obs2 = X_batch[:, 24:48]
+        acts = X_batch[:, 48:52]
+        rews = X_batch[:, 52]
+        d = [False]*batch_size
         return obs1, obs2, acts, rews, d
     
 

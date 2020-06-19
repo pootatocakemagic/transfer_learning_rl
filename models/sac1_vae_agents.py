@@ -5,6 +5,7 @@ from spinup.algos.sac1.core import get_vars
 from numbers import Number
 from lib.data_writer import VideoWriter
 import os, time
+from models.vae import Vae
 import cv2
 import config
 import random
@@ -65,62 +66,6 @@ def get_batch_exp_c(replay_buffer1, replay_buffer2, batch_size = 128):
     count += 1
     return res
 
-# def get_batch_exp_d(replay_buffer1, replay_buffer2, batch_size = 128):
-#     global data, count, part
-#     if count < N:
-#         obs1_1 = replay_buffer1[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 0]
-#         obs2_1 = replay_buffer1[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 1]
-#         action_1 = replay_buffer1[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 2]
-#         reward_1 = replay_buffer1[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 3]
-#         d_1 = replay_buffer1[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 4]
-#         obs1_2 = replay_buffer2[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 0]
-#         obs2_2 = replay_buffer2[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 1]
-#         action_2 = replay_buffer2[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 2]
-#         reward_2 = replay_buffer2[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 3]
-#         d_2 = replay_buffer2[part*(len(replay_buffer1[:, 0])//10):(part+1)*(len(replay_buffer1[:, 0])//10), 4]
-#     elif count >= N:
-#         # print('hey')
-#         part += 1
-#         if part > 9:
-#             part = 0
-#
-#         # print('updated', count, len(data[0]))
-#         count = 1
-#         obs1_1 = replay_buffer1[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-#                  0]
-#         obs2_1 = replay_buffer1[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-#                  1]
-#         action_1 = replay_buffer1[
-#                    part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 2]
-#         reward_1 = replay_buffer1[
-#                    part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 3]
-#         d_1 = replay_buffer1[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 4]
-#         obs1_2 = replay_buffer2[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-#                  0]
-#         obs2_2 = replay_buffer2[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10),
-#                  1]
-#         action_2 = replay_buffer2[
-#                    part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 2]
-#         reward_2 = replay_buffer2[
-#                    part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 3]
-#         d_2 = replay_buffer2[part * (len(replay_buffer1[:, 0]) // 10):(part + 1) * (len(replay_buffer1[:, 0]) // 10), 4]
-#     idxs2 = np.random.randint(0, len(obs1_2)-1, size=batch_size)
-#     # print('!!!!', np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))).shape)
-#     # print(np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))).shape)
-#     # print(np.vstack((tuple(obs2_1[idxs2]), tuple(obs2_2[idxs2]))).shape)
-#     # print(np.vstack((tuple(action_1[idxs2]), tuple(action_2[idxs2]))).shape)
-#     # print(np.hstack((tuple(reward_1[idxs2]), tuple(reward_2[idxs2]))).shape)
-#     # print(np.hstack((tuple(d_1[idxs2]), tuple(d_2[idxs2]))).shape)
-#     # print(obs1_1[idxs2][0])
-#     # exit()
-#     res = dict(obs1=np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))),
-#          obs2=np.vstack((tuple(obs2_1[idxs2]), tuple(obs2_2[idxs2]))),
-#          acts=np.vstack((tuple(action_1[idxs2]), tuple(action_2[idxs2]))),
-#          rews=np.hstack((tuple(reward_1[idxs2]), tuple(reward_2[idxs2]))),
-#          done=np.hstack((tuple(d_1[idxs2]), tuple(d_2[idxs2]))))
-#     count += 1
-#     return res
-
 def get_batch_exp_d(replay_buffer1, replay_buffer2, batch_size = 128):
     global data, count, part
     if count < N:
@@ -161,14 +106,6 @@ def get_batch_exp_d(replay_buffer1, replay_buffer2, batch_size = 128):
         reward_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 3]
         d_2 = replay_buffer2[:(part + 1) * (len(replay_buffer1[:, 0]) // 10), 4]
     idxs2 = np.random.randint(0, len(obs1_2)-1, size=batch_size)
-    # print('!!!!', np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))).shape)
-    # print(np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))).shape)
-    # print(np.vstack((tuple(obs2_1[idxs2]), tuple(obs2_2[idxs2]))).shape)
-    # print(np.vstack((tuple(action_1[idxs2]), tuple(action_2[idxs2]))).shape)
-    # print(np.hstack((tuple(reward_1[idxs2]), tuple(reward_2[idxs2]))).shape)
-    # print(np.hstack((tuple(d_1[idxs2]), tuple(d_2[idxs2]))).shape)
-    # print(obs1_1[idxs2][0])
-    # exit()
     res = dict(obs1=np.vstack((tuple(obs1_1[idxs2]), tuple(obs1_2[idxs2]))),
          obs2=np.vstack((tuple(obs2_1[idxs2]), tuple(obs2_2[idxs2]))),
          acts=np.vstack((tuple(action_1[idxs2]), tuple(action_2[idxs2]))),
@@ -176,6 +113,18 @@ def get_batch_exp_d(replay_buffer1, replay_buffer2, batch_size = 128):
          done=np.hstack((tuple(d_1[idxs2]), tuple(d_2[idxs2]))))
     count += 1
     return res
+
+
+def get_vae_batches(vae1, vae2, batch_size_1, batch_size_2):
+    obs1_1, obs2_1, action_1, reward_1, d_1 = vae1.get_data(batch_size_1)
+    obs1_2, obs2_2, action_2, reward_2, d_2 = vae2.get_data(batch_size_2)
+    res = dict(obs1=np.vstack((tuple(obs1_1), tuple(obs1_2))),
+               obs2=np.vstack((tuple(obs2_1), tuple(obs2_2))),
+               acts=np.vstack((tuple(action_1), tuple(action_2))),
+               rews=np.hstack((tuple(reward_1), tuple(reward_2))),
+               done=np.hstack((tuple(d_1), tuple(d_2))))
+    return res
+
 
 def get_batch_exp_z(replay_buffer1, replay_buffer2, batch_size_1, batch_size_2):
     global data, count
@@ -234,7 +183,7 @@ def get_batch_exp_z(replay_buffer1, replay_buffer2, batch_size_1, batch_size_2):
     return res
 
 
-def sac1(apr, ts_env, env_fn, replay_buffer, replay_buffer2, vae=None, x_train=None, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
+def sac1(apr, ts_env, env_fn, vae=None, x_train=None, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
          steps_per_epoch=5000, epochs=100, replay_size=int(2e6), gamma=0.99, reward_scale=1.0,
          polyak=0.995, lr=5e-4, alpha=0.2, batch_size=250, start_steps=10,
          max_ep_len_train=1000, max_ep_len_test=1000, logger_kwargs=dict(), save_freq=1):
@@ -456,12 +405,31 @@ def sac1(apr, ts_env, env_fn, replay_buffer, replay_buffer2, vae=None, x_train=N
     mix_offset = 5000000000  # отвечает за число шагов после которых начинается смешивание буферов
     mix_step = 1 # определяет за какое число шагов смешивание изменяется на единицу
     # Main loop: collect experience in env and update/log each epoch
-    batch1 = get_batch_exp_z(replay_buffer, replay_buffer2, n, m)
-    batch2 = get_batch_exp_z(replay_buffer, replay_buffer2, n, m)
+    vae1 = Vae(config)
+    vae2 = Vae(config)
+    x_train = np.load('replay_лестницы.npz', allow_pickle=True)['arr_0']
+    y = np.array([np.array(xi) for xi in x_train[:, 0]])
+    for i in range(1, 5):
+        if i < 3:
+            temp = np.array([np.array(xi) for xi in x_train[:, i]])
+        else:
+            temp = np.array([np.array(xi) for xi in x_train[:, i]]).reshape(-1, 1)
+        y = np.concatenate([y, temp], axis=1)
+    vae1.fit_vae(y)
+    # x_train = np.load('replay_{}.npz'.format(ENV))['arr_0']
+    x_train = np.load('replay_ямы.npz', allow_pickle=True)['arr_0']
+    y = np.array([np.array(xi) for xi in x_train[:, 0]])
+    for i in range(1, 5):
+        if i < 3:
+            temp = np.array([np.array(xi) for xi in x_train[:, i]])
+        else:
+            temp = np.array([np.array(xi) for xi in x_train[:, i]]).reshape(-1, 1)
+        y = np.concatenate([y, temp], axis=1)
+    vae2.fit_vae(y)
     for t in range(total_steps):
         for j in range(5000):
             # t = time.time()
-            batch = get_batch_exp_z(replay_buffer, replay_buffer2, n, m)
+            batch = get_vae_batches(vae1, vae2, n, m)
             if t > mix_offset:
                 if t % mix_step == 0 and n != min_n:
                     n -= 1
